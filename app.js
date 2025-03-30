@@ -59,6 +59,12 @@ app.get("/listing",async (req, res) => {
     }
 })
 
+
+//New route
+app.get("/listing/new", (req, res) => {
+    res.render("listing/new.ejs");
+})
+
 // Show Route
 app.get("/listing/:id", async (req, res) => {
     let {id} = req.params;
@@ -67,7 +73,13 @@ app.get("/listing/:id", async (req, res) => {
 })
 
 
-
+app.post("/listing", async (req, res) => {
+    const newListing = new Listing(req.body.listing);
+    await newListing.save();
+    res.redirect("/listing");
+    
+    
+})
 
 
 
