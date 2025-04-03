@@ -5,6 +5,8 @@ const Listing = require("./models/listing.js");
 const path = require("path");
 const methodoverride = require("method-override");
 const ejsMate = require("ejs-mate");
+const wrapAsync = require("./utils/wrapAsync.js");
+const ExpressError = require("./utils/ExpressError.js"); 
  
 const MONGO_URL = "mongodb://127.0.0.1:27017/wanderlust";
 
@@ -63,50 +65,66 @@ app.get("/listing",async (req, res) => {
 
 
 //New route
-app.get("/listing/new", (req, res) => {
+app.get("/listing/new", wrapAsync((req, res) => {
     res.render("listing/new.ejs");
-})
+}));
 
 // Show Route
-app.get("/listing/:id", async (req, res) => {
+app.get("/listing/:id", wrapAsync(async (req, res) => {
     let {id} = req.params;
     const listing = await Listing.findById(id);
     res.render("listing/show.ejs", { listing });
-})
+}));
 
-
-app.post("/listing", async (req, res) => {
+// Create Route
+app.post("/listing", wrapAsync(async (req, res, next) => {
+    
+    if(!req.body.listing){
+        throw new ExpressError(400, "Send valid data for listing")
+    }
     const newListing = new Listing(req.body.listing);
     await newListing.save();
     res.redirect("/listing");
+
     
-})
+}));
 
 //Edit routre
-app.get("/listing/:id/edit", async(req, res) => {
+app.get("/listing/:id/edit", wrapAsync(async(req, res) => {
     let {id} = req.params;
     const listing = await Listing.findById(id);
     res.render("listing/edit.ejs", { listing });
-})
+}));
 
 //Update route
-app.put("/listing/:id", async (req, res) => {
+app.put("/listing/:id", wrapAsync(async (req, res) => {
+    if(!req.body.listing){
+        throw new ExpressError(400, "Send valid data for listing")
+    }
     let { id } = req.params;
     await Listing.findByIdAndUpdate(id, {...req.body.listing});
     res.redirect(`/listing/${id}`);
-})
+}));
 
 //Delete Route
-app.delete("/listing/:id", async (req, res) => {
+app.delete("/listing/:id", wrapAsync(async (req, res) => {
     let { id } = req.params;
     let deletedListing = await Listing.findByIdAndDelete(id);
     console.log(deletedListing);
     res.redirect("/listing");
     
+}));
+
+
+
+app.all("*", (req, res, next) =>{
+    next(new ExpressError(404, "Page Not Found!"));
 })
 
-
-
+app.use((err, req, res, next) => {
+    let { statusCode = 500, message = " Some thing worng"} = err;
+    res.status(statusCode).send(message);
+})
 
 
 
