@@ -10,6 +10,7 @@ const ExpressError = require("./utils/ExpressError.js");
 const { listingSchema, reviewSchema } = require("./schema.js");
 const review = require("./models/review.js");
 const Review = require("./models/review.js");
+const { render } = require("ejs");
  
 const MONGO_URL = "mongodb://127.0.0.1:27017/wanderlust";
 
@@ -99,7 +100,7 @@ app.get("/listing/new", wrapAsync((req, res) => {
 // Show Route
 app.get("/listing/:id", wrapAsync(async (req, res) => {
     let {id} = req.params;
-    const listing = await Listing.findById(id);
+    const listing = await Listing.findById(id).populate("reviews");
     res.render("listing/show.ejs", { listing });
 }));
 
@@ -140,7 +141,7 @@ app.delete("/listing/:id", wrapAsync(async (req, res) => {
 
 
 //Reviews 
-// post Routes
+// post review Routes
 app.post("/listing/:id/reviews", validateReview, wrapAsync( async(req, res) => { 
     let listing = await Listing.findById(req.params.id);
     let newReview = new Review(req.body.review);
@@ -150,10 +151,20 @@ app.post("/listing/:id/reviews", validateReview, wrapAsync( async(req, res) => {
     await newReview.save();
     await listing.save();
 
-    res.send(`/listing/${listing._id}`);
-
-    
+    res.redirect(`/listing/${listing.id}`);  
 }));
+
+
+//Delete Review Route
+
+app.delete("/listing/:id/reviews/:reviewId", wrapAsync( async(req, res) => {
+    let { id, reviewId} = req.params;
+    
+    await Listing.findByIdAndUpdate(id, {$pull : {reviews : reviewId}})
+    await Review.findByIdAndDelete(reviewId);
+
+    res.redirect(`/listing/${id}`)
+}))
 
 
 
