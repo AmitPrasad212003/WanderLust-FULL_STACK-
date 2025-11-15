@@ -2,6 +2,7 @@ const express = require("express");
 const router = express.Router({ mergeParams: true });
 const User = require("../models/user.js")
 const wrapAsync = require("../utils/wrapAsync.js");
+const passport = require("passport");
 const ExpressError = require("../utils/ExpressError.js");
 const { route } = require("./listing.js");
 
@@ -26,6 +27,11 @@ router.post("/signup", wrapAsync(async(req, res) => {
 router.get("/login", (req, res) => {
     res.render("users/login.ejs");
 })
+
+router.post("/login",  passport.authenticate('local', { failureRedirect: '/login', failureFlash: true }), async(req, res) => {
+    req.flash("success","welcome back to wanderlust! you are logged in!");
+    res.redirect("/listing");
+});
 
 
 module.exports = router;
