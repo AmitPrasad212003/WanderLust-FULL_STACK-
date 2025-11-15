@@ -8,13 +8,13 @@ const { route } = require("./listing.js");
 const userControllers = require("../controllers/users.js");
 
 
-router.get("/signup", userControllers.renderSignupForm);
+router.route("/signup")
+    .get(userControllers.renderSignupForm)
+    .post(wrapAsync(userControllers.signup));
 
-router.post("/signup", wrapAsync(userControllers.signup));
-
-router.get("/login", userControllers.renderLoginForm);
-
-router.post("/login", saveredirectUrl,  passport.authenticate('local', { failureRedirect: '/login', failureFlash: true }), userControllers.login);
+router.route("/login")
+    .get(userControllers.renderLoginForm)
+    .post(saveredirectUrl,  passport.authenticate('local', { failureRedirect: '/login', failureFlash: true }), userControllers.login);
 
 router.get("/logout", userControllers.logout);
 
