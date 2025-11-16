@@ -17,6 +17,8 @@ const flash = require("connect-flash");
 const passport = require("passport");
 const LocalStrategy = require("passport-local");
 const User = require("./models/user.js");
+const wrapAsync = require("./utils/wrapAsync.js");
+const listingController = require("./controllers/listings.js");
 
 
 
@@ -73,9 +75,6 @@ const sessionOption = {
 }
 
 
-// app.get("/", (req, res) => {
-//     res.send("Hi, I am root");
-// });
 
 
 
@@ -104,6 +103,7 @@ app.use((req, res, next) => {
 })
 
 
+app.get("/", wrapAsync(listingController.index));
 
 app.use("/listing", listingRouter);
 app.use("/listing/:id/reviews", reviewRouter);
