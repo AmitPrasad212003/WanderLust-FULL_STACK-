@@ -1,13 +1,21 @@
 <% layout("/layouts/boilerplates") %>
-
+<script>(g=>{var h,a,k,p="The Google Maps JavaScript API",c="google",l="importLibrary",q="__ib__",m=document,b=window;b=b[c]||(b[c]={});var d=b.maps||(b.maps={}),r=new Set,e=new URLSearchParams,u=()=>h||(h=new Promise(async(f,n)=>{await (a=m.createElement("script"));e.set("libraries",[...r]+"");for(k in g)e.set(k.replace(/[A-Z]/g,t=>"_"+t[0].toLowerCase()),g[k]);e.set("callback",c+".maps."+q);a.src=`https://maps.${c}apis.com/maps/api/js?`+e;d[q]=f;a.onerror=()=>h=n(Error(p+" could not load."));a.nonce=m.querySelector("script[nonce]")?.nonce||"";m.head.append(a)}));d[l]?console.warn(p+" only loads once. Ignoring:",g):d[l]=(f,...n)=>r.add(f)&&u().then(()=>d[l](f,...n))})
+        ({key: "<%= mapApiKey %>", v: "weekly"});</script>
+       
+        
 <body>
     <div class="row mt-3">
         <div class="col-8 offset-3">   
             <h3><%= listing.title %></h3>
         </div>
         <div class="card col-6 offset-3 show-card listing-card">
-            
+            <% if (listing.image && listing.image.url) { %>
                 <img src="<%= listing.image.url %>" class="card-img-top show-img" alt="listing_image">
+            <% } else { %>
+                <div class="card-img-top show-img bg-secondary d-flex align-items-center justify-content-center" style="height: 300px;">
+                    <p class="text-white">No Image Available</p>
+                </div>
+            <% } %>
                 <div class="card-body">
                 <p class="card-text"><b>Owned By : </b><i><%= listing.owner.username %></i></p>
                 <p class="card-text"><%= listing.description %> </p>
@@ -64,23 +72,45 @@
 <% } %>
     <hr>
 
-    <p><b>All Reviews</b></p>
-    <div class="row">
-        <% for(review of listing.reviews) {%>
-            <div class="card col-5 ms-3 mb-3">
-                <div class="card-body">
-                    <h5 class="card-title">@<%= review.author.username %></h5>
-                    <p class="starability-result card-text" data-rating="<%= review.rating %>"></p>
-                    <p class="card-text"><%= review.comment %></p>
+    <% if (listing.reviews.length > 0) { %>
+        <p><b>All Reviews</b></p>
+        <div class="row">
+            <% for(review of listing.reviews) {%>
+                <div class="card col-5 ms-3 mb-3">
+                    <div class="card-body">
+                        <h5 class="card-title">@<%= review.author.username %></h5>
+                        <p class="starability-result card-text" data-rating="<%= review.rating %>"></p>
+                        <p class="card-text"><%= review.comment %></p>
+                    </div>
+                    <% if (currUser && currUser._id.equals(review.author._id)) { %>
+                        <form action="/listing/<%= listing._id %>/reviews/<%= review._id %>?_method=DELETE" method="POST" class="mb-3">
+                            <button class="btn btn-sm btn-dark">Delete</button>
+                        </form>
+                    <% } %>
                 </div>
-                <% if (currUser && currUser._id.equals(review.author._id)) { %>
-                    <form action="/listing/<%= listing._id %>/reviews/<%= review._id %>?_method=DELETE" method="POST" class="mb-3">
-                        <button class="btn btn-sm btn-dark">Delete</button>
-                    </form>
-                <% } %>
-            </div>
-        <% } %>
+            <% } %>
+        </div>
+     <hr>
+    <% } %>
+
+    
+</div>
+<div class="col-8 offset-3 mb-3">
+  <h3>Where you'll be</h3>
+
+  <% if (listing.geometry && listing.geometry.coordinates && listing.geometry.coordinates.length === 2) { %>
+    <div id="map"
+         data-lat="<%= listing.geometry.coordinates[1] %>"
+         data-lng="<%= listing.geometry.coordinates[0] %>"
+         data-title="<%= listing.title %>"
+         data-location="<%= listing.location %>"
+         data-country="<%= listing.country %>"
+         data-price="<%= listing.price %>"
+         style="height: 400px; width: 100%; border-radius: 6px;">
     </div>
-    </div>
+  <% } else { %>
+    <p class="text-muted">Map not available for this listing (address not geocoded).</p>
+  <% } %>
+</div>
 
 </body>

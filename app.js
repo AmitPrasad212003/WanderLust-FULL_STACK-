@@ -43,6 +43,10 @@ app.use(express.urlencoded({extended : true}));
 app.use(methodoverride("_method"));
 app.engine("ejs", ejsMate);
 app.use(express.static(path.join(__dirname, "/public")));
+app.use((req, res, next) => {
+    res.locals.mapApiKey = process.env.MAP_API_KEY;
+    next();
+});
 
 
 const sessionOption = {
@@ -114,9 +118,10 @@ app.all("*", (req, res, next) =>{
 })
 
 app.use((err, req, res, next) => {
-    let { statusCode = 500, message = " Some thing worng"} = err;
+    let { statusCode = 500, message = "Something went wrong"} = err;
+    console.error("Error:", err);
     // res.status(statusCode).send(message);
-        res.status(statusCode).render("error.ejs", {err})
+    res.status(statusCode).render("error.ejs", {err})
 })
 
 

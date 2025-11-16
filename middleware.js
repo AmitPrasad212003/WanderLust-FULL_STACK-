@@ -22,13 +22,25 @@ module.exports.saveredirectUrl = (req, res, next) => {
 }
 
 module.exports.isOwner = async(req, res, next) => {
-    let {id} = req.params;
-    let listing = await Listing.findById(id);
-    if(!listing.owner._id.equals(res.locals.currUser._id)){
-        req.flash("error", "You are the not owner of this listing");
-        return res.redirect(`/listing/${id}`);
+    try {
+        let {id} = req.params;
+        if (!res.locals.currUser) {
+            req.flash("error", "You must be logged in");
+            return res.redirect("/login");
+        }
+        let listing = await Listing.findById(id).populate("owner");
+        if(!listing){
+            req.flash("error", "Listing not found");
+            return res.redirect("/listing");
+        }
+        if(!listing.owner || !listing.owner._id.equals(res.locals.currUser._id)){
+            req.flash("error", "You are not the owner of this listing");
+            return res.redirect(`/listing/${id}`);
+        }
+        next();
+    } catch (err) {
+        next(err);
     }
-    next();
 }
 
 module.exports.validateListing = (req, res, next) => {
@@ -56,12 +68,24 @@ module.exports.validateReview = (req, res, next) => {
 }
 
 module.exports.isReviewAuthor = async(req, res, next) => {
-    let {id, reviewId } = req.params;
-    let review = await Review.findById(reviewId);
-    if(!review.author._id.equals(res.locals.currUser._id)){
-        req.flash("error", "You are the not author of this listing");
-        return res.redirect(`/listing/${id}`);
+    try {
+        let {id, reviewId } = req.params;
+        if (!res.locals.currUser) {
+            req.flash("error", "You must be logged in");
+            return res.redirect("/login");
+        }
+        let review = await Review.findById(reviewId).populate("author");
+        if(!review){
+            req.flash("error", "Review not found");
+            return res.redirect(`/listing/${id}`);
+        }
+        if(!review.author || !review.author._id.equals(res.locals.currUser._id)){
+            req.flash("error", "You are not the author of this review");
+            return res.redirect(`/listing/${id}`);
+        }
+        next();
+    } catch (err) {
+        next(err);
     }
-    next();
 }
 
