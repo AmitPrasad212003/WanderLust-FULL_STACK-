@@ -5,9 +5,57 @@ const fetch = require("node-fetch"); // if node < 18
 
 
 
-module.exports.index = async (req, res) => {
-    const allListings = await Listing.find({});
-    res.render("listing/index.ejs", { allListings });
+module.exports.index = async (req, res, next) => {
+    try {
+        const { location, category, minPrice, maxPrice, search } = req.query;
+        
+        // Build query object
+        let query = {};
+        
+        // Location search (case-insensitive)
+        if (location && location.trim()) {
+            query.location = { $regex: location.trim(), $options: 'i' };
+        }
+        
+        // Category filter
+        if (category && category.trim() && category !== 'All') {
+            query.category = category;
+        }
+        
+        // Price range filter
+        if (minPrice || maxPrice) {
+            query.price = {};
+            if (minPrice) {
+                query.price.$gte = Number(minPrice);
+            }
+            if (maxPrice) {
+                query.price.$lte = Number(maxPrice);
+            }
+        }
+        
+        // General search (searches in title, description, location, country)
+        if (search && search.trim()) {
+            query.$or = [
+                { title: { $regex: search.trim(), $options: 'i' } },
+                { description: { $regex: search.trim(), $options: 'i' } },
+                { location: { $regex: search.trim(), $options: 'i' } },
+                { country: { $regex: search.trim(), $options: 'i' } }
+            ];
+        }
+        
+        const allListings = await Listing.find(query);
+        
+        // Get unique categories for filter
+        const categories = await Listing.distinct('category');
+        
+        res.render("listing/index.ejs", { 
+            allListings,
+            categories: categories.filter(c => c), // Remove null/undefined
+            currentFilters: { location, category, minPrice, maxPrice, search }
+        });
+    } catch (err) {
+        next(err);
+    }
 }
 
 module.exports.renderNewForm = (req, res) => {

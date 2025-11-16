@@ -84,6 +84,8 @@ app.use((req, res, next) => {
     res.locals.success = req.flash("success");
     res.locals.error = req.flash("error");
     res.locals.currUser = req.user;
+    // Pass query params for navbar search
+    res.locals.currentFilters = req.query;
 
     next();
 

@@ -1,133 +1,622 @@
 <% layout("/layouts/boilerplates") %>
 
-    <style>
-        #filters {
-            display: flex;
-            flex-wrap: wrap;
-            align-items: center;
-        }
-        .filter{
-            text-align: center;
-            margin-top: 2rem;
-            margin-right: 2rem;
-            opacity: 0.7;
+<style>
+    /* Filter Container - Horizontal Scrollable */
+    .filters-container {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        margin-bottom: 2rem;
+        padding: 1rem 0;
+        position: relative;
+        overflow: visible;
+    }
+
+    /* Category Filters - Horizontal Scroll */
+    .category-filters {
+        display: flex;
+        align-items: center;
+        gap: 1.5rem;
+        overflow-x: auto;
+        overflow-y: hidden;
+        flex: 1;
+        padding: 0.5rem 0;
+        scroll-behavior: smooth;
+        -webkit-overflow-scrolling: touch;
+        scrollbar-width: none; /* Firefox - hide scrollbar */
+        -ms-overflow-style: none; /* IE and Edge - hide scrollbar */
+        max-height: 70px;
+    }
+
+    /* Hide scrollbar for Chrome, Safari and Opera */
+    .category-filters::-webkit-scrollbar {
+        display: none;
+    }
+
+    .filter {
+        text-align: center;
+        opacity: 0.7;
+        transition: all 0.3s ease;
+        cursor: pointer;
+        padding: 8px 12px;
+        border-radius: 12px;
+        min-width: 70px;
+        flex-shrink: 0;
+        position: relative;
+        background: transparent;
+    }
+
+    .filter:hover {
+        opacity: 1;
+        background-color: #f7f7f7;
+    }
+
+    .filter.active {
+        opacity: 1;
+        background-color: #000;
+        color: white;
+    }
+
+    .filter.active i {
+        color: white;
+    }
+
+    .filter i {
+        font-size: 1.2rem;
+        color: #333;
+        display: block;
+        margin-bottom: 3px;
+        transition: color 0.3s ease;
+    }
+
+    .filter p {
+        font-size: 0.75rem;
+        margin: 0;
+        font-weight: 500;
+        white-space: nowrap;
+    }
+
+    /* Tax Toggle - Right Side */
+    .tax-toggle-container {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        padding: 0.4rem 0.9rem;
+        border: 1px solid #ddd;
+        border-radius: 30px;
+        background: white;
+        flex-shrink: 0;
+        white-space: nowrap;
+        height: fit-content;
+    }
+
+    .tax-toggle-container .form-check {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        margin: 0;
+        flex-direction: row;
+    }
+
+    .tax-toggle-container label {
+        margin: 0;
+        font-size: 0.85rem;
+        color: #333;
+        cursor: pointer;
+        line-height: 1.2;
+        order: 1;
+    }
+
+    .tax-toggle-container .form-check-input {
+        margin: 0;
+        cursor: pointer;
+        width: 2.5em;
+        height: 1.4em;
+        order: 2;
+        flex-shrink: 0;
+    }
+
+    .tax-toggle-container .form-switch {
+        margin: 0;
+        display: flex;
+        align-items: center;
+    }
+
+    /* Mobile Tax Toggle - Icon Only */
+    .tax-toggle-icon {
+        display: none;
+        padding: 0.75rem;
+        border: 1px solid #ddd;
+        border-radius: 50%;
+        background: white;
+        cursor: pointer;
+        flex-shrink: 0;
+        transition: all 0.3s ease;
+    }
+
+    .tax-toggle-icon:hover {
+        background: #f7f7f7;
+        border-color: #fe424d;
+    }
+
+    .tax-toggle-icon.active {
+        background: #fe424d;
+        border-color: #fe424d;
+        color: white;
+    }
+
+    .tax-toggle-icon i {
+        font-size: 1.2rem;
+    }
+
+    /* Filter Panel - For Advanced Filters */
+    .filter-panel {
+        position: fixed;
+        top: 0;
+        right: -400px;
+        width: 380px;
+        height: 100vh;
+        background: white;
+        box-shadow: -2px 0 10px rgba(0,0,0,0.1);
+        z-index: 1050;
+        transition: right 0.3s ease;
+        overflow-y: auto;
+        padding: 20px;
+    }
+
+    .filter-panel.open {
+        right: 0;
+    }
+
+    .filter-overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0,0,0,0.5);
+        z-index: 1040;
+        display: none;
+    }
+
+    .filter-overlay.show {
+        display: block;
+    }
+
+    /* Mobile Filter Button */
+    .mobile-filter-btn {
+        display: none;
+        padding: 0.75rem 1rem;
+        border: 1px solid #ddd;
+        border-radius: 25px;
+        background: white;
+        cursor: pointer;
+        flex-shrink: 0;
+        gap: 0.5rem;
+        align-items: center;
+        font-size: 0.9rem;
+        transition: all 0.3s ease;
+    }
+
+    .mobile-filter-btn:hover {
+        border-color: #fe424d;
+        background: #f7f7f7;
+    }
+
+    .mobile-filter-btn i {
+        font-size: 1rem;
+    }
+
+    /* Filter Panel Content */
+    .filter-panel h3 {
+        margin-bottom: 20px;
+        color: #333;
+        border-bottom: 2px solid #fe424d;
+        padding-bottom: 10px;
+    }
+
+    .filter-section {
+        margin-bottom: 25px;
+    }
+
+    .filter-section label {
+        display: block;
+        margin-bottom: 8px;
+        font-weight: 600;
+        color: #333;
+    }
+
+    .filter-section input,
+    .filter-section select {
+        width: 100%;
+        padding: 10px;
+        border: 1px solid #ddd;
+        border-radius: 8px;
+        font-size: 14px;
+    }
+
+    .filter-actions {
+        display: flex;
+        gap: 10px;
+        margin-top: 20px;
+    }
+
+    .filter-actions button {
+        flex: 1;
+        padding: 12px;
+        border: none;
+        border-radius: 8px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s ease;
+    }
+
+    .btn-apply {
+        background: #fe424d;
+        color: white;
+    }
+
+    .btn-apply:hover {
+        background: #d6363f;
+    }
+
+    .btn-clear {
+        background: #f7f7f7;
+        color: #333;
+    }
+
+    .btn-clear:hover {
+        background: #e0e0e0;
+    }
+
+    .tax-info {
+        display: none;
+    }
+
+    /* Responsive Design */
+    @media (max-width: 768px) {
+        .filters-container {
+            gap: 0.75rem;
+            padding: 0.75rem 0;
         }
 
-        .filter:hover{
-            opacity: 1;
-            cursor: pointer;
+        .category-filters {
+            gap: 1rem;
+            max-height: 60px;
+        }
+
+        .filter {
+            min-width: 60px;
+            padding: 6px 10px;
+        }
+
+        .filter i {
+            font-size: 1.1rem;
         }
 
         .filter p {
-            font-size: 0.8rem;
+            font-size: 0.7rem;
         }
 
-        .tax-info {
+        .tax-toggle-container {
             display: none;
         }
 
-        .tax-toggle{
-            border: 1px solid black;
-            border-radius: 1rem;
-            height: 2.5rem;
-            padding: 1rem;
-            margin-left: 2rem;
+        .tax-toggle-icon {
             display: flex;
             align-items: center;
-
+            justify-content: center;
+            padding: 0.6rem;
         }
-    </style>
-    <div id="filters">
-        <div class="filter">
-            <div><i class="fa-solid fa-fire"></i></div>
+
+        .tax-toggle-icon i {
+            font-size: 1rem;
+        }
+
+        .mobile-filter-btn {
+            display: flex;
+            padding: 0.6rem 0.9rem;
+            font-size: 0.85rem;
+        }
+
+        .filter-panel {
+            width: 100%;
+            right: -100%;
+        }
+    }
+
+    @media (max-width: 576px) {
+        .category-filters {
+            gap: 0.75rem;
+        }
+
+        .filter {
+            min-width: 60px;
+            padding: 8px 10px;
+        }
+
+        .filter i {
+            font-size: 1.2rem;
+        }
+
+        .filter p {
+            font-size: 0.7rem;
+        }
+    }
+
+    /* Listing Cards */
+    .listing-card {
+        transition: transform 0.3s ease;
+    }
+
+    .listing-card:hover {
+        transform: translateY(-5px);
+    }
+
+    .no-listings {
+        text-align: center;
+        padding: 50px 20px;
+        color: #666;
+    }
+
+    .no-listings i {
+        font-size: 4rem;
+        margin-bottom: 20px;
+        opacity: 0.3;
+    }
+</style>
+
+<!-- Filter Overlay -->
+<div class="filter-overlay" id="filterOverlay"></div>
+
+<!-- Filter Panel -->
+<div class="filter-panel" id="filterPanel">
+    <h3><i class="fa-solid fa-sliders"></i> Filters</h3>
+    
+    <form id="filterForm" action="/listing" method="GET">
+        <!-- Search -->
+        <div class="filter-section">
+            <label for="searchInput"><i class="fa-solid fa-magnifying-glass"></i> Search</label>
+            <input type="text" id="searchInput" name="search" placeholder="Search by title, location, country..." value="<%= typeof currentFilters !== 'undefined' && currentFilters.search ? currentFilters.search : '' %>">
+        </div>
+
+        <!-- Location -->
+        <div class="filter-section">
+            <label for="locationInput"><i class="fa-solid fa-location-dot"></i> Location</label>
+            <input type="text" id="locationInput" name="location" placeholder="Enter location..." value="<%= typeof currentFilters !== 'undefined' && currentFilters.location ? currentFilters.location : '' %>">
+        </div>
+
+        <!-- Category -->
+        <div class="filter-section">
+            <label for="categorySelect"><i class="fa-solid fa-tags"></i> Category</label>
+            <select id="categorySelect" name="category">
+                <option value="All">All Categories</option>
+                <% if (typeof categories !== 'undefined' && categories.length > 0) { %>
+                    <% categories.forEach(cat => { %>
+                        <option value="<%= cat %>" <%= typeof currentFilters !== 'undefined' && currentFilters.category === cat ? 'selected' : '' %>><%= cat %></option>
+                    <% }); %>
+                <% } %>
+            </select>
+        </div>
+
+        <!-- Price Range -->
+        <div class="filter-section">
+            <label><i class="fa-solid fa-indian-rupee-sign"></i> Price Range</label>
+            <div style="display: flex; gap: 10px;">
+                <input type="number" name="minPrice" placeholder="Min" value="<%= typeof currentFilters !== 'undefined' && currentFilters.minPrice ? currentFilters.minPrice : '' %>" style="flex: 1;">
+                <input type="number" name="maxPrice" placeholder="Max" value="<%= typeof currentFilters !== 'undefined' && currentFilters.maxPrice ? currentFilters.maxPrice : '' %>" style="flex: 1;">
+            </div>
+        </div>
+
+        <!-- Actions -->
+        <div class="filter-actions">
+            <button type="submit" class="btn-apply">Apply Filters</button>
+            <button type="button" class="btn-clear" onclick="clearFilters()">Clear</button>
+        </div>
+    </form>
+</div>
+
+<!-- Filters Container - Horizontal Line -->
+<div class="filters-container">
+    <!-- Mobile Filter Button -->
+    <button class="mobile-filter-btn" id="mobileFilterBtn">
+        <i class="fa-solid fa-sliders"></i>
+        <span>Filters</span>
+    </button>
+
+    <!-- Category Filters - Horizontal Scroll -->
+    <div class="category-filters">
+        <div class="filter <%= typeof currentFilters === 'undefined' || !currentFilters.category || currentFilters.category === 'All' ? 'active' : '' %>" data-category="All">
+            <i class="fa-solid fa-fire"></i>
             <p>Trending</p>
         </div>
-        <div class="filter">
-            <div><i class="fa-solid fa-bed"></i></div>
+        <div class="filter <%= typeof currentFilters !== 'undefined' && currentFilters.category === 'Rooms' ? 'active' : '' %>" data-category="Rooms">
+            <i class="fa-solid fa-bed"></i>
             <p>Rooms</p>
         </div>
-        <div class="filter">
-            <div><i class="fa-solid fa-city"></i></div>
+        <div class="filter <%= typeof currentFilters !== 'undefined' && currentFilters.category === 'Iconic Cities' ? 'active' : '' %>" data-category="Iconic Cities">
+            <i class="fa-solid fa-city"></i>
             <p>Iconic Cities</p>
         </div>
-        <div class="filter">
-            <div><i class="fa-solid fa-mountain"></i></div>
+        <div class="filter <%= typeof currentFilters !== 'undefined' && currentFilters.category === 'Mountains' ? 'active' : '' %>" data-category="Mountains">
+            <i class="fa-solid fa-mountain"></i>
             <p>Mountains</p>
         </div>
-        <div class="filter">
-            <div><i class="fa-brands fa-fort-awesome"></i></div>
+        <div class="filter <%= typeof currentFilters !== 'undefined' && currentFilters.category === 'Castle' ? 'active' : '' %>" data-category="Castle">
+            <i class="fa-brands fa-fort-awesome"></i>
             <p>Castle</p>
         </div>
-        <div class="filter">
-            <div><i class="fa-solid fa-person-swimming"></i></div>
+        <div class="filter <%= typeof currentFilters !== 'undefined' && currentFilters.category === 'Amazing Pools' ? 'active' : '' %>" data-category="Amazing Pools">
+            <i class="fa-solid fa-person-swimming"></i>
             <p>Amazing Pools</p>
         </div>
-        <div class="filter">
-            <div><i class="fa-solid fa-campground"></i></div>
+        <div class="filter <%= typeof currentFilters !== 'undefined' && currentFilters.category === 'Camping' ? 'active' : '' %>" data-category="Camping">
+            <i class="fa-solid fa-campground"></i>
             <p>Camping</p>
         </div>
-        <div class="filter">
-            <div><i class="fa-solid fa-cow"></i></div>
+        <div class="filter <%= typeof currentFilters !== 'undefined' && currentFilters.category === 'Farms' ? 'active' : '' %>" data-category="Farms">
+            <i class="fa-solid fa-cow"></i>
             <p>Farms</p>
         </div>
-        <div class="filter">
-            <div><i class="fa-regular fa-snowflake"></i></div>
+        <div class="filter <%= typeof currentFilters !== 'undefined' && currentFilters.category === 'Arctice' ? 'active' : '' %>" data-category="Arctice">
+            <i class="fa-regular fa-snowflake"></i>
             <p>Arctice</p>
         </div>
-        <div class="filter">
-            <div><i class="fa-solid fa-igloo"></i></div>
+        <div class="filter <%= typeof currentFilters !== 'undefined' && currentFilters.category === 'Domes' ? 'active' : '' %>" data-category="Domes">
+            <i class="fa-solid fa-igloo"></i>
             <p>Domes</p>
         </div>
-        <!-- <div class="filter">
-            <div<i class="fa-solid fa-ship"></i></div>
-            <p>Boats</p>
-        </div> -->
+    </div>
 
-        <div class="tax-toggle">
-            <div class="form-check-reverse form-switch">
-            <input class="form-check-input" type="checkbox" role="switch" id="switchCheckDefault">
+    <!-- Tax Toggle - Desktop -->
+    <div class="tax-toggle-container">
+        <div class="form-check form-switch">
             <label class="form-check-label" for="switchCheckDefault">Display Taxes</label>
-</div>
+            <input class="form-check-input" type="checkbox" role="switch" id="switchCheckDefault">
         </div>
     </div>
-    <div class="row row-cols-lg-3 row-cols-md-3 row-cols-sm-1 mt-3">
+
+    <!-- Tax Toggle - Mobile Icon -->
+    <div class="tax-toggle-icon" id="taxToggleIcon" title="Display Taxes">
+        <i class="fa-solid fa-receipt"></i>
+    </div>
+</div>
+
+<!-- Listings -->
+<% if (allListings.length === 0) { %>
+    <div class="no-listings">
+        <i class="fa-solid fa-inbox"></i>
+        <h3>No listings found</h3>
+        <p>Try adjusting your filters or search criteria.</p>
+    </div>
+<% } else { %>
+    <div class="row row-cols-lg-3 row-cols-md-2 row-cols-sm-1 row-cols-1 mt-3">
         <% for (let listing of allListings) { %> 
             <a href="/listing/<%= listing._id %>" class="listing-link">
-            <div class="card col listing-card" >
-                <% if (listing.image && listing.image.url) { %>
-                <img src="<%= listing.image.url %>" class="card-img-top" alt="listing_image" style="height: 20rem;">
-                <% } else { %>
-                <div class="card-img-top bg-secondary d-flex align-items-center justify-content-center" style="height: 20rem;">
-                    <p class="text-white">No Image</p>
+                <div class="card col listing-card">
+                    <% if (listing.image && listing.image.url) { %>
+                        <img src="<%= listing.image.url %>" class="card-img-top" alt="listing_image" style="height: 20rem; object-fit: cover;">
+                    <% } else { %>
+                        <div class="card-img-top bg-secondary d-flex align-items-center justify-content-center" style="height: 20rem;">
+                            <p class="text-white">No Image</p>
+                        </div>
+                    <% } %>
+                    <div class="card-img-overlay"></div>
+                    <div class="card-body">
+                        <p class="card-text">
+                            <b><%= listing.title %></b>
+                            <br>
+                            <span style="color: #666; font-size: 0.9rem;">
+                                <i class="fa-solid fa-location-dot"></i> <%= listing.location %>, <%= listing.country %>
+                            </span>
+                            <br>
+                            <span style="font-size: 1.1rem; font-weight: 600;">
+                                &#8377; <%= listing.price.toLocaleString("en-IN") %>/night
+                            </span>
+                            <i class="tax-info"> &nbsp; &nbsp; +18% GST</i>
+                        </p>
+                    </div>
                 </div>
-                <% } %>
-                <div class="card-img-overlay"></div>
-                <div class="card-body">
-                  <p class="card-text">
-                    <b><%= listing.title %></b>
-                    <br>
-                    &#8377; <%= listing.price.toLocaleString("en-IN") %>/night
-                    <i class="tax-info"> &nbsp; &nbsp; +18% GST</i>
-                </p>
-                </div>
-            </div>
             </a>
-            <% } %>
+        <% } %>
     </div>
-  
+<% } %>
 
 <script>
-    let taxSwitch = document.getElementById("switchCheckDefault");
-    
-    taxSwitch.addEventListener("click", () => {
-        let taxInfo = document.getElementsByClassName("tax-info");
-        
-        for(info of taxInfo){
-            if(info.style.display != "inline"){
-                info.style.display = "inline";
-            }else{
-                info.style.display = "none";
+    // Mobile Filter Panel Toggle
+    const mobileFilterBtn = document.getElementById('mobileFilterBtn');
+    const filterPanel = document.getElementById('filterPanel');
+    const filterOverlay = document.getElementById('filterOverlay');
+
+    function toggleFilterPanel() {
+        filterPanel.classList.toggle('open');
+        filterOverlay.classList.toggle('show');
+    }
+
+    if (mobileFilterBtn) {
+        mobileFilterBtn.addEventListener('click', toggleFilterPanel);
+    }
+    filterOverlay.addEventListener('click', toggleFilterPanel);
+
+    // Category Filter Click
+    document.querySelectorAll('.filter').forEach(filter => {
+        filter.addEventListener('click', function() {
+            const category = this.dataset.category;
+            if (category) {
+                // Update active state
+                document.querySelectorAll('.filter').forEach(f => f.classList.remove('active'));
+                this.classList.add('active');
+                
+                // Build URL with category filter
+                const url = new URL(window.location.href);
+                if (category === 'All') {
+                    url.searchParams.delete('category');
+                } else {
+                    url.searchParams.set('category', category);
+                }
+                window.location.href = url.toString();
             }
+        });
+    });
+
+    // Tax Toggle - Desktop
+    const taxSwitch = document.getElementById("switchCheckDefault");
+    if (taxSwitch) {
+        taxSwitch.addEventListener("change", function() {
+            const taxInfo = document.getElementsByClassName("tax-info");
+            const isChecked = this.checked;
+            for(let info of taxInfo) {
+                if(isChecked) {
+                    info.style.display = "inline";
+                } else {
+                    info.style.display = "none";
+                }
+            }
+        });
+    }
+
+    // Tax Toggle - Mobile Icon
+    const taxToggleIcon = document.getElementById("taxToggleIcon");
+    let taxVisible = false;
+
+    if (taxToggleIcon) {
+        taxToggleIcon.addEventListener("click", () => {
+            taxVisible = !taxVisible;
+            const taxInfo = document.getElementsByClassName("tax-info");
+            
+            for(let info of taxInfo) {
+                if(taxVisible) {
+                    info.style.display = "inline";
+                } else {
+                    info.style.display = "none";
+                }
+            }
+            
+            // Toggle active state
+            taxToggleIcon.classList.toggle('active');
+        });
+    }
+
+    // Sync tax toggle states
+    if (taxSwitch && taxToggleIcon) {
+        taxSwitch.addEventListener("change", () => {
+            if (taxSwitch.checked) {
+                taxToggleIcon.classList.add('active');
+            } else {
+                taxToggleIcon.classList.remove('active');
+            }
+        });
+    }
+
+    // Clear Filters
+    function clearFilters() {
+        window.location.href = '/listing';
+    }
+
+    // Close filter panel on escape key
+    document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape' && filterPanel.classList.contains('open')) {
+            toggleFilterPanel();
         }
-    })
+    });
 </script>

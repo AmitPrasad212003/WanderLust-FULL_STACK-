@@ -9,6 +9,7 @@ const listingSchema = new Schema({
   price: Number,
   location: String,
   country: String,
+  category: { type: String, default: "Rooms" },
   geometry: {
     type: {
       type: String,

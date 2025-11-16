@@ -1,28 +1,46 @@
 <!-- Footer -->
-<footer class="text-dark py-2" style="background-color: #ebebeb;"> <!-- Applied background color -->
+<footer class="text-dark py-2" style="background-color: #ebebeb;">
     <div class="container">
-        <div class="row align-items-center">
+        <!-- Desktop View -->
+        <div class="row align-items-center d-none d-md-flex">
             <!-- Left Section: Language & Currency -->
-            <div class="col-md-4 text-md-start text-center mb-1">
+            <div class="col-md-4 text-md-start">
                 <i class="fas fa-globe"></i> English (IN) &nbsp; ₹ INR
             </div>
 
             <!-- Center Section: Social Media Icons -->
-            <div class="col-md-4 text-center mb-1">
+            <div class="col-md-4 text-center">
                 <a href="#" class="text-dark mx-2"><i class="fab fa-facebook"></i></a>
                 <a href="#" class="text-dark mx-2"><i class="fab fa-x-twitter"></i></a>
                 <a href="#" class="text-dark mx-2"><i class="fab fa-instagram"></i></a>
-                <a href="#" class="text-dark mx-2"><i class="fab fa-linkedin"></i></a> <!-- LinkedIn Icon -->
+                <a href="#" class="text-dark mx-2"><i class="fab fa-linkedin"></i></a>
             </div>
 
             <!-- Right Section: Copyright -->
-            <div class="col-md-4 text-md-end text-center mb-1">
+            <div class="col-md-4 text-md-end">
                 © 2025 Wanderlust, Inc.
             </div>
         </div>
 
-        <!-- Bottom Links -->
-        <div class="text-center mt-1"> <!-- Reduced margin-top -->
+        <!-- Mobile View - Only Social Icons and Copyright -->
+        <div class="row align-items-center d-md-none">
+            <div class="col-12 text-center mb-2">
+                <!-- Social Media Icons -->
+                <div class="mb-2">
+                    <a href="#" class="text-dark mx-2"><i class="fab fa-facebook"></i></a>
+                    <a href="#" class="text-dark mx-2"><i class="fab fa-x-twitter"></i></a>
+                    <a href="#" class="text-dark mx-2"><i class="fab fa-instagram"></i></a>
+                    <a href="#" class="text-dark mx-2"><i class="fab fa-linkedin"></i></a>
+                </div>
+                <!-- Copyright -->
+                <div class="small">
+                    © 2025 Wanderlust, Inc.
+                </div>
+            </div>
+        </div>
+
+        <!-- Bottom Links - Desktop Only -->
+        <div class="text-center mt-1 d-none d-md-block">
             <a href="#" class="text-dark mx-2">Privacy</a> ·
             <a href="#" class="text-dark mx-2">Terms</a> ·
             <a href="#" class="text-dark mx-2">Sitemap</a> ·
